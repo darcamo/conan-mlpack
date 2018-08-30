@@ -20,6 +20,16 @@ class MlpackConan(ConanFile):
         self.requires("armadillo/9.100.5@darcamo/stable")
         self.requires("boost/1.68.0@conan/stable")
 
+        if tools.os_info.is_linux and self.settings.compiler == 'clang':
+            # Openmp is already included in gcc, but in case of clang, a
+            # separate package must be installed such that clang can compile
+            # openmp programs
+            installer = tools.SystemPackageTool()
+            if tools.os_info.linux_distro == "ubuntu":
+                installer.install("libomp-dev")
+            elif tools.os_info.linux_distro == "arch":
+                installer.install("openmp")
+
     def source(self):
         tools.get("http://www.mlpack.org/files/mlpack-{}.tar.gz".format(self.version))
         shutil.move("mlpack-{}/".format(self.version), "sources")
