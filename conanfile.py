@@ -2,6 +2,9 @@ from conans import ConanFile, CMake, tools
 import os
 import shutil
 
+# Need to install libomp-dev in ubuntu to compile with clang or openmp in arch
+# export CXXFLAGS="-std=c++14"
+
 class MlpackConan(ConanFile):
     name = "mlpack"
     version = "3.0.3"
@@ -49,15 +52,11 @@ conan_basic_setup()''')
                               "find_package(Armadillo 6.500.0 REQUIRED)",
                               "SET(ARMADILLO_VERSION_MAJOR 9)")
 
-        # tools.replace_in_file("sources/CMake/FindArmadillo.cmake", "set(MLPACK_LIBRARIES ${MLPACK_LIBRARIES} \"m\")",
-        #                       "set(MLPACK_LIBRARIES ${MLPACK_LIBRARIES} \"m\" ${CONAN_LIBS})")
-
     def build(self):
         os.mkdir("build")
         shutil.move("conanbuildinfo.cmake", "build/")
 
         cmake = CMake(self)
-
         # Currently if we try to build the tests we get undefined reference to
         # "boost::unit_test::unit_test_main(bool (*)(), int, char**)" when
         # building the mlpack_test target
