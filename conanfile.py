@@ -13,17 +13,16 @@ class MlpackConan(ConanFile):
     description = "C++ machine learning library with emphasis on scalability, speed, and ease-of-use"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
-               "link_with_mkl": [True, False]}
-    default_options = "shared=True", "link_with_mkl=False"
+               "link_with_mkl": [True, False],
+               "use_openmp": [True, False]}
+    default_options = "shared=True", "link_with_mkl=False", "use_openmp=False"
     generators = "cmake"
-
-    # TODO: Add option to enable/disable openmp
 
     def requirements(self):
         self.requires("armadillo/9.100.5@darcamo/stable")
         self.requires("boost/1.68.0@conan/stable")
 
-        if tools.os_info.is_linux and self.settings.compiler == 'clang':
+        if self.options.use_openmp and tools.os_info.is_linux and self.settings.compiler == 'clang':
             # Openmp is already included in gcc, but in case of clang, a
             # separate package must be installed such that clang can compile
             # openmp programs
@@ -62,13 +61,20 @@ conan_basic_setup()''')
         # building the mlpack_test target
         cmake.definitions["BUILD_TESTS"] = False
         cmake.definitions["BUILD_CLI_EXECUTABLES"] = False
+        cmake.definitions["BUILD_PYTHON_BINDINGS"] = False
+
+        if self.options.use_openmp:
+            cmake.definitions["USE_OPENMP"] = True
+        else:
+            cmake.definitions["USE_OPENMP"] = False
         cmake.configure(source_folder="sources", build_folder="build")
         cmake.build()
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["mlpack"]
-        self.cpp_info.cppflags = ["-fopenmp"]
+        if self.options.use_openmp:
+            self.cpp_info.cppflags = ["-fopenmp"]
 
         if self.options.link_with_mkl:
             # self.cpp_info.libs.extend(["mkl_rt", "hdf5"])
