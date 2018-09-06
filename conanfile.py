@@ -15,7 +15,7 @@ class MlpackConan(ConanFile):
     options = {"shared": [True, False],
                "link_with_mkl": [True, False],
                "use_openmp": [True, False]}
-    default_options = "shared=True", "link_with_mkl=False", "use_openmp=False"
+    default_options = "shared=True", "link_with_mkl=False", "use_openmp=True"
     generators = "cmake"
 
     def requirements(self):
@@ -75,6 +75,7 @@ conan_basic_setup()''')
         self.cpp_info.libs = ["mlpack"]
         if self.options.use_openmp:
             self.cpp_info.cppflags = ["-fopenmp"]
+            self.cpp_info.sharedlinkflags = ["-fopenmp"]
 
         if self.options.link_with_mkl:
             # self.cpp_info.libs.extend(["mkl_rt", "hdf5"])
