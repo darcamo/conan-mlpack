@@ -7,7 +7,7 @@ import shutil
 
 class MlpackConan(ConanFile):
     name = "mlpack"
-    version = "3.0.3"
+    version = "3.0.4"
     license = "BSD License"
     url = "https://github.com/darcamo/conan-mlpack"
     description = "C++ machine learning library with emphasis on scalability, speed, and ease-of-use"
@@ -19,7 +19,7 @@ class MlpackConan(ConanFile):
     generators = "cmake"
 
     def requirements(self):
-        self.requires("armadillo/9.100.5@darcamo/stable")
+        self.requires("armadillo/9.200.4@darcamo/stable")
         self.requires("boost/1.68.0@conan/stable")
 
         if self.options.use_openmp and tools.os_info.is_linux and self.settings.compiler == 'clang':
