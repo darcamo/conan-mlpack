@@ -19,7 +19,7 @@ class MlpackConan(ConanFile):
     generators = "cmake"
 
     def requirements(self):
-        self.requires("armadillo/9.200.4@darcamo/stable")
+        self.requires("armadillo/9.200.7@darcamo/stable")
         self.requires("boost/1.68.0@conan/stable")
 
         if self.options.use_openmp and tools.os_info.is_linux and self.settings.compiler == 'clang':
