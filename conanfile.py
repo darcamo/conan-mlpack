@@ -7,7 +7,7 @@ import shutil
 
 class MlpackConan(ConanFile):
     name = "mlpack"
-    version = "3.4.1"
+    version = "3.4.2"
     license = "BSD License"
     url = "https://github.com/darcamo/conan-mlpack"
     description = "C++ machine learning library with emphasis on scalability, speed, and ease-of-use"
