@@ -13,15 +13,20 @@ class MlpackConan(ConanFile):
     description = "C++ machine learning library with emphasis on scalability, speed, and ease-of-use"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
-               "link_with_mkl": [True, False],
                "use_openmp": [True, False]}
-    default_options = "shared=True", "link_with_mkl=False", "use_openmp=True"
+    default_options = { "shared":True,
+                        "use_openmp":True
+                       }
     generators = "cmake"
     homepage = "https://www.mlpack.org"
 
     def requirements(self):
-        self.requires("armadillo/[>=9.400.3]@darcamo/stable")
+        self.requires("armadillo/[>=10.1.2]@darcamo/stable")
         self.requires("boost/[>=1.68.0]@conan/stable")
+
+        if self.options.shared:
+            self.options["armadillo"].shared = True
+            self.options["boost"].shared = True
 
         if self.options.use_openmp and tools.os_info.is_linux and self.settings.compiler == 'clang':
             # Openmp is already included in gcc, but in case of clang, a
@@ -33,8 +38,11 @@ class MlpackConan(ConanFile):
             elif tools.os_info.linux_distro == "arch":
                 installer.install("openmp")
 
+    # def configure(self):
+    #     self.options["armadillo"].link_with_mkl = True
+
     def source(self):
-        tools.get("http://www.mlpack.org/files/mlpack-{}.tar.gz".format(self.version))
+        tools.get("https://www.mlpack.org/files/mlpack-{}.tar.gz".format(self.version))
         shutil.move("mlpack-{}/".format(self.version), "sources")
 
         tools.replace_in_file("sources/CMakeLists.txt", "project(mlpack C CXX)",
@@ -49,8 +57,8 @@ conan_basic_setup()''')
         # However, the variable 'ARMADILLO_VERSION_MAJOR' is checked and thus
         # now we need to set it.
         tools.replace_in_file("sources/CMakeLists.txt",
-                              "find_package(Armadillo 6.500.0 REQUIRED)",
-                              "SET(ARMADILLO_VERSION_MAJOR 9)")
+                              "find_package(Armadillo \"${ARMADILLO_VERSION}\" REQUIRED)",
+                              f"SET(ARMADILLO_VERSION_MAJOR {self.requires['armadillo'].ref.version})")
 
     def build(self):
         os.mkdir("build")
@@ -77,7 +85,3 @@ conan_basic_setup()''')
         if self.options.use_openmp:
             self.cpp_info.cppflags = ["-fopenmp"]
             self.cpp_info.sharedlinkflags = ["-fopenmp"]
-
-        if self.options.link_with_mkl:
-            # self.cpp_info.libs.extend(["mkl_rt", "hdf5"])
-            self.cpp_info.libdirs.append("/opt/intel/mkl/lib/intel64")
